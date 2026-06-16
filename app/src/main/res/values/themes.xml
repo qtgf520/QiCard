@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.QiTongNetwork" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Compose 渲染基于 MaterialTheme，XML 主题仅用于启动窗口 -->
+        <item name="android:colorBackground">@color/white</item>
+        <item name="android:statusBarColor">#FF3700B3</item>
+    </style>
+</resources>
