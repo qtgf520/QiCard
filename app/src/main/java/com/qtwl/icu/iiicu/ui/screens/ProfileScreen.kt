@@ -30,7 +30,8 @@ import com.qtwl.icu.iiicu.util.UserManager
 @Composable
 fun ProfileScreen(
     onNavigateToLogin: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToWebView: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val isLoggedIn = UserManager.isLoggedIn()
@@ -108,7 +109,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(48.dp))
 
                 Button(
-                    onClick = { openUrl(context, UserManager.getAppUrl()) },
+                    onClick = { onNavigateToWebView() },
                     modifier = Modifier.fillMaxWidth().height(50.dp)
                 ) {
                     Icon(Icons.Default.OpenInBrowser, contentDescription = null)

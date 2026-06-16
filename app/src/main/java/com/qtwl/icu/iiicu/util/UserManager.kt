@@ -181,5 +181,5 @@ object UserManager {
     fun getAppUrl(): String = "http://www.jili5.cn/app.php"
 
     /** 获取当前 APP 版本号 */
-    fun getAppVersion(): String = "8.0"
+    fun getAppVersion(): String = "8.2"
 }

@@ -187,20 +187,12 @@ fun AppNavigation(
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Person, contentDescription = null) },
                         label = { Text("我的") },
-                        selected = currentRoute in setOf("webview", "login", "settings"),
+                        selected = currentRoute in setOf("profile", "login", "settings"),
                         onClick = {
-                            if (UserManager.isLoggedIn()) {
-                                navController.navigate("webview") {
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            } else {
-                                navController.navigate("login") {
-                                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                            navController.navigate("profile") {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
                             }
                         }
                     )
@@ -247,7 +239,14 @@ fun AppNavigation(
             composable("profile") {
                 ProfileScreen(
                     onNavigateToLogin = { navController.navigate("login") },
-                    onNavigateToSettings = { navController.navigate("settings") }
+                    onNavigateToSettings = { navController.navigate("settings") },
+                    onNavigateToWebView = {
+                        navController.navigate("webview") {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
 
@@ -262,7 +261,7 @@ fun AppNavigation(
             composable("login") {
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate("webview") {
+                        navController.navigate("profile") {
                             popUpTo("main") { saveState = true }
                             launchSingleTop = true
                             restoreState = true
