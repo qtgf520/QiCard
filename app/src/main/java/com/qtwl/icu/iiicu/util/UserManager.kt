@@ -179,4 +179,7 @@ object UserManager {
 
     /** 获取 app.php 完整 URL（登录后 WebView 加载） */
     fun getAppUrl(): String = "http://www.jili5.cn/app.php"
+
+    /** 获取当前 APP 版本号 */
+    fun getAppVersion(): String = "8.0"
 }

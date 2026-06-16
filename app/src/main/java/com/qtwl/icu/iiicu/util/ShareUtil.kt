@@ -2,6 +2,7 @@ package com.qtwl.icu.iiicu.util
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import com.qtwl.icu.iiicu.model.ShareCard
 import com.tencent.tauth.IUiListener
@@ -70,7 +71,34 @@ object ShareUtil {
                 }
             }
 
-            tencent.shareToQQ(context as Activity, params, listener)
+            // 使用 applicationContext 兼容 Activity 已被销毁的情况
+            val activityContext = if (context is Activity) {
+                context
+            } else {
+                Toast.makeText(context, "分享失败：无法获取活动上下文", Toast.LENGTH_SHORT).show()
+                return false
+            }
+
+            // 用 try-catch 包裹实际调用，防止 QQ SDK 内部异常导致闪退
+            try {
+                tencent.shareToQQ(activityContext, params, listener)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // 尝试通过 Intent 方式分享（兜底）
+                try {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, card.title)
+                        putExtra(Intent.EXTRA_TEXT, "${card.title}\n${card.content}\n${card.url}")
+                        setPackage("com.tencent.mobileqq")
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "分享到"))
+                    Toast.makeText(context, "使用系统分享方式", Toast.LENGTH_SHORT).show()
+                } catch (e2: Exception) {
+                    Toast.makeText(context, "分享失败，请重试", Toast.LENGTH_SHORT).show()
+                    return false
+                }
+            }
             return true
 
         } catch (e: Exception) {
