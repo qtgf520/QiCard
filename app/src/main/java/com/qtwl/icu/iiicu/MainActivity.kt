@@ -239,14 +239,7 @@ fun AppNavigation(
             composable("profile") {
                 ProfileScreen(
                     onNavigateToLogin = { navController.navigate("login") },
-                    onNavigateToSettings = { navController.navigate("settings") },
-                    onNavigateToWebView = {
-                        navController.navigate("webview") {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+                    onNavigateToSettings = { navController.navigate("settings") }
                 )
             }
 

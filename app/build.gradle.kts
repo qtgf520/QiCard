@@ -11,8 +11,8 @@ android {
         applicationId = "com.qtwl.icu.iiicu"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "8.2"
+        versionCode = 12
+        versionName = "8.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
