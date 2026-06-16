@@ -1,12 +1,16 @@
 package com.qtwl.icu.iiicu.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -27,6 +31,7 @@ fun EditCardScreen(
     val content by viewModel.content.collectAsState()
     val url by viewModel.url.collectAsState()
     val imageUrl by viewModel.imageUrl.collectAsState()
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
@@ -44,17 +49,18 @@ fun EditCardScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 图片预览
+            // 图片预览 — 小正方形预览
             if (imageUrl.isNotBlank()) {
                 AsyncImage(
                     model = imageUrl,
                     contentDescription = "图片预览",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                        .size(width = 100.dp, height = 100.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.Crop
                 )
             }
@@ -95,7 +101,7 @@ fun EditCardScreen(
                 singleLine = true
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // 底部按钮
             Row(
@@ -120,6 +126,9 @@ fun EditCardScreen(
                     Text("保存")
                 }
             }
+
+            // 底部留白，确保滑到底时不被系统导航栏遮挡
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
