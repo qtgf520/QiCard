@@ -130,7 +130,7 @@ fun AppNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
     val context = LocalContext.current
 
-    val bottomBarRoutes = setOf("main", "generate", "profile")
+    val bottomBarRoutes = setOf("main", "generate", "webview", "profile")
     val showBottomBar = currentRoute in bottomBarRoutes
 
     // 处理初始分享 URL（仅一次）
@@ -187,10 +187,10 @@ fun AppNavigation(
                     NavigationBarItem(
                         icon = { Icon(Icons.Default.Person, contentDescription = null) },
                         label = { Text("我的") },
-                        selected = currentRoute in setOf("profile", "login", "settings"),
+                        selected = currentRoute in setOf("webview", "login", "settings"),
                         onClick = {
                             if (UserManager.isLoggedIn()) {
-                                navController.navigate("profile") {
+                                navController.navigate("webview") {
                                     popUpTo(navController.graph.startDestinationId) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
@@ -262,7 +262,7 @@ fun AppNavigation(
             composable("login") {
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate("profile") {
+                        navController.navigate("webview") {
                             popUpTo("main") { saveState = true }
                             launchSingleTop = true
                             restoreState = true
