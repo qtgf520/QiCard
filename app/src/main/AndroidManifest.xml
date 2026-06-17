@@ -4,9 +4,11 @@
 
     <!-- 网络权限（分享内容需要加载网络图片） -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- 读取外部存储（如需从本地选择图片分享） -->
+    <!-- 读取外部存储（Android 12 及以下，从本地选择图片分享） -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
+    <!-- 读取媒体图片（Android 13+ 替代 READ_EXTERNAL_STORAGE） -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <!-- Android 11+ 包可见性声明：支持检测QQ是否已安装 -->
     <queries>

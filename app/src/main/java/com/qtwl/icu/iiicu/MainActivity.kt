@@ -254,10 +254,9 @@ fun AppNavigation(
             composable("login") {
                 LoginScreen(
                     onLoginSuccess = {
-                        navController.navigate("profile") {
-                            popUpTo("main") { saveState = true }
+                        navController.navigate("main") {
+                            popUpTo("main") { inclusive = true }
                             launchSingleTop = true
-                            restoreState = true
                         }
                     }
                 )
@@ -317,12 +316,6 @@ fun AppNavigation(
                             mainViewModel.updateCard(context, card)
                         }
                         navController.popBackStack()
-                        // 保存成功后自动跳转分享
-                        ShareUtil.shareWebPage(
-                            context = activity,
-                            card = card,
-                            listener = shareListener
-                        )
                     }
                 )
             }

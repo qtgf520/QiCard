@@ -1,8 +1,13 @@
 package com.qtwl.icu.iiicu.ui.screens
 
 import android.content.Intent
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.qtwl.icu.iiicu.util.UserManager
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -43,8 +50,20 @@ fun SettingsScreen(onBack: () -> Unit) {
     val scrollState = rememberScrollState()
 
     // 权限开关状态
-    var storageGranted by remember { mutableStateOf(false) }
+    var storageGranted by remember { mutableStateOf(checkStoragePermission(context)) }
     var networkGranted by remember { mutableStateOf(true) } // 网络权限默认开启
+
+    // 权限请求 Launcher
+    val storagePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        storageGranted = granted
+        Toast.makeText(
+            context,
+            if (granted) "存储权限已开启" else "存储权限授权被拒绝",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
     Scaffold(
         topBar = {
@@ -95,12 +114,22 @@ fun SettingsScreen(onBack: () -> Unit) {
                 checked = storageGranted,
                 enabled = true,
                 onToggle = {
-                    storageGranted = it
-                    Toast.makeText(
-                        context,
-                        if (it) "存储权限已开启" else "存储权限已关闭",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (it) {
+                        // 打开 → 请求权限
+                        val permission = if (Build.VERSION.SDK_INT >= 33)
+                            Manifest.permission.READ_MEDIA_IMAGES
+                        else
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        storagePermissionLauncher.launch(permission)
+                    } else {
+                        // 关闭 → 提示用户手动关闭
+                        storageGranted = false
+                        Toast.makeText(
+                            context,
+                            "请在系统设置中关闭存储权限",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             )
 
@@ -238,7 +267,9 @@ SOFTWARE."""
                 text = "关于",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -261,25 +292,33 @@ SOFTWARE."""
                         "綦桐网络",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         "v${UserManager.getAppVersion()}",
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         "綦桐网络已开源 · MIT License",
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         "Made with ❤️ by 綦桐科技",
                         fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     TextButton(
@@ -377,4 +416,17 @@ private fun PermissionItem(
             )
         }
     )
+}
+
+/**
+ * 检查当前存储权限是否已授予
+ */
+private fun checkStoragePermission(context: android.content.Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= 33) {
+        ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES) ==
+                PackageManager.PERMISSION_GRANTED
+    } else {
+        ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED
+    }
 }

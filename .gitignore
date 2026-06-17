@@ -22,3 +22,7 @@ tools/
 .backup/
 .operit/
 .kotlin/
+
+# Backup directories
+_backup_*/
+_backups/
