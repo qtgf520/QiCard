@@ -29,6 +29,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.qtwl.icu.iiicu.util.QQConfigManager
+import com.qtwl.icu.iiicu.util.QQUtil
+import com.qtwl.icu.iiicu.util.SignatureUtil
 import com.qtwl.icu.iiicu.util.UserManager
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -47,6 +50,12 @@ fun SettingsScreen(onBack: () -> Unit) {
     var licenseContent by remember { mutableStateOf("") }
     var showThirdPartyDialog by remember { mutableStateOf(false) }
     var thirdPartyContent by remember { mutableStateOf("") }
+
+    // QQ互联自定义配置状态
+    var customQqEnabled by remember { mutableStateOf(QQConfigManager.isCustomEnabled()) }
+    var customAppId by remember { mutableStateOf(QQConfigManager.getCustomAppId()) }
+    var customAppKey by remember { mutableStateOf(QQConfigManager.getCustomAppKey()) }
+    val signatureMd5 = remember { SignatureUtil.getSignatureMD5(context) }
     val scrollState = rememberScrollState()
 
     // 权限开关状态
@@ -262,6 +271,155 @@ SOFTWARE."""
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // ========== QQ互联自定义配置区域 ==========
+            Text(
+                text = "QQ互联设置",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 自定义QQ互联开关
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    ListItem(
+                        headlineContent = { Text("开启自定义互联信息") },
+                        supportingContent = {
+                            Text(
+                                if (customQqEnabled) "已启用自定义配置" else "使用系统默认配置"
+                            )
+                        },
+                        leadingContent = {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = if (customQqEnabled) MaterialTheme.colorScheme.primary
+                                       else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = customQqEnabled,
+                                onCheckedChange = { enabled ->
+                                    customQqEnabled = enabled
+                                    QQConfigManager.setCustomEnabled(enabled)
+                                    // 切换时自动应用配置
+                                    if (enabled && customAppId.isNotBlank()) {
+                                        QQUtil.init(context, customAppId)
+                                    } else if (!enabled) {
+                                        QQUtil.init(context, null)
+                                    }
+                                }
+                            )
+                        }
+                    )
+
+                    if (customQqEnabled) {
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                        // 自定义 APP ID 输入
+                        OutlinedTextField(
+                            value = customAppId,
+                            onValueChange = { value ->
+                                customAppId = value
+                                QQConfigManager.setCustomAppId(value)
+                            },
+                            label = { Text("自定义 APP ID") },
+                            placeholder = { Text("请输入 QQ互联 APP ID") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // 自定义 APP Key 输入
+                        OutlinedTextField(
+                            value = customAppKey,
+                            onValueChange = { value ->
+                                customAppKey = value
+                                QQConfigManager.setCustomAppKey(value)
+                            },
+                            label = { Text("自定义 APP Key") },
+                            placeholder = { Text("请输入 QQ互联 APP Key") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // 应用自定义配置按钮
+                        Button(
+                            onClick = {
+                                if (customAppId.isNotBlank()) {
+                                    QQUtil.init(context, customAppId)
+                                    Toast.makeText(context, "已应用自定义 QQ互联配置", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "请输入 APP ID", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("应用自定义配置")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // 清除自定义配置按钮
+                        OutlinedButton(
+                            onClick = {
+                                QQConfigManager.clearCustomConfig()
+                                customQqEnabled = false
+                                customAppId = ""
+                                customAppKey = ""
+                                // 恢复系统默认
+                                QQUtil.init(context, null)
+                                Toast.makeText(context, "已清除自定义配置，恢复系统默认", Toast.LENGTH_SHORT).show()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Text("清除自定义配置（使用系统默认）")
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ========== 签名信息展示卡片 ==========
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "应用签名信息",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    InformationRow(label = "应用程序", value = "綦桐网络")
+                    Spacer(modifier = Modifier.height(4.dp))
+                    InformationRow(label = "包名", value = context.packageName)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    InformationRow(
+                        label = "签名",
+                        value = signatureMd5,
+                        isMono = true
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             // ========== 关于区域 ==========
             Text(
                 text = "关于",
@@ -428,5 +586,38 @@ private fun checkStoragePermission(context: android.content.Context): Boolean {
     } else {
         ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) ==
                 PackageManager.PERMISSION_GRANTED
+    }
+}
+
+/**
+ * 信息行展示组件：用于展示 "标签：值" 形式的信息
+ */
+@Composable
+private fun InformationRow(
+    label: String,
+    value: String,
+    isMono: Boolean = false
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$label：",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = value,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontFamily = if (isMono) androidx.compose.ui.text.font.FontFamily.Monospace
+                         else androidx.compose.ui.text.font.FontFamily.Default,
+            fontWeight = if (isMono) FontWeight.Normal else FontWeight.Medium,
+            textAlign = TextAlign.End,
+            modifier = Modifier.widthIn(max = 240.dp)
+        )
     }
 }

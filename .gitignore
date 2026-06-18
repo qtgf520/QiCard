@@ -26,3 +26,4 @@ tools/
 # Backup directories
 _backup_*/
 _backups/
+*.bak_*

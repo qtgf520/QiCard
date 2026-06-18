@@ -12,9 +12,18 @@ object QQUtil {
     private var tencent: Tencent? = null
 
     fun init(context: Context) {
-        if (tencent != null) return
-        val appId = context.getString(R.string.qq_app_id)
-        tencent = Tencent.createInstance(appId, context.applicationContext)
+        init(context, null)
+    }
+
+    fun init(context: Context, customAppId: String?) {
+        if (customAppId.isNullOrBlank()) {
+            // 使用系统默认配置（strings.xml 中的 qq_app_id）
+            val appId = context.getString(R.string.qq_app_id)
+            tencent = Tencent.createInstance(appId, context.applicationContext)
+        } else {
+            // 自定义 ID：强制使用自定义值（覆盖任何之前的配置）
+            tencent = Tencent.createInstance(customAppId, context.applicationContext)
+        }
     }
 
     fun getTencent(): Tencent? = tencent

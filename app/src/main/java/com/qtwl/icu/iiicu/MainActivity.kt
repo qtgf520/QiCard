@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.qtwl.icu.iiicu.ui.screens.*
 import com.qtwl.icu.iiicu.ui.theme.MyApplicationTheme
+import com.qtwl.icu.iiicu.util.QQConfigManager
 import com.qtwl.icu.iiicu.util.QQUtil
 import com.qtwl.icu.iiicu.util.ShareUtil
 import com.qtwl.icu.iiicu.util.UserManager
@@ -60,7 +61,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        QQUtil.init(this)
+        // 初始化配置管理器（必须在 QQUtil 之前）
+        QQConfigManager.init(this)
+        // 使用有效配置初始化 QQ互联：自定义开启则用自定义ID，否则用系统默认（strings.xml 中的 qq_app_id）
+        QQUtil.init(this, QQConfigManager.getEffectiveAppId())
         UserManager.init(this)
 
         val sharedUrl = extractSharedUrl(intent)
