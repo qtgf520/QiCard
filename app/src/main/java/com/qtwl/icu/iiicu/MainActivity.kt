@@ -1,5 +1,7 @@
 package com.qtwl.icu.iiicu
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -43,18 +45,28 @@ class MainActivity : ComponentActivity() {
     private val shareListener = object : IUiListener {
         override fun onComplete(response: Any?) {
             runOnUiThread {
-                Toast.makeText(this@MainActivity, "分享成功！", Toast.LENGTH_SHORT).show()
+                // 返回闪退修复：Activity 已销毁时不再操作 UI
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                try {
+                    Toast.makeText(this@MainActivity, "分享成功！", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) { }
             }
         }
         override fun onError(error: UiError?) {
             runOnUiThread {
-                val msg = error?.errorMessage ?: "未知错误"
-                Toast.makeText(this@MainActivity, "分享失败：$msg", Toast.LENGTH_SHORT).show()
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                try {
+                    val msg = error?.errorMessage ?: "未知错误"
+                    Toast.makeText(this@MainActivity, "分享失败：$msg", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) { }
             }
         }
         override fun onCancel() {
             runOnUiThread {
-                Toast.makeText(this@MainActivity, "已取消分享", Toast.LENGTH_SHORT).show()
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                try {
+                    Toast.makeText(this@MainActivity, "已取消分享", Toast.LENGTH_SHORT).show()
+                } catch (_: Exception) { }
             }
         }
     }

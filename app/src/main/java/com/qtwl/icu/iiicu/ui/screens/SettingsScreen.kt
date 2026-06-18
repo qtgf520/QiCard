@@ -408,7 +408,18 @@ SOFTWARE."""
 
                     InformationRow(label = "应用程序", value = "綦桐网络")
                     Spacer(modifier = Modifier.height(4.dp))
-                    InformationRow(label = "包名", value = context.packageName)
+                    // 包名点击复制
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                            val clip = android.content.ClipData.newPlainText("package_name", context.packageName)
+                            clipboard.setPrimaryClip(clip)
+                            Toast.makeText(context, "包名已复制到剪贴板", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        InformationRow(label = "包名", value = context.packageName)
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     InformationRow(
                         label = "签名",

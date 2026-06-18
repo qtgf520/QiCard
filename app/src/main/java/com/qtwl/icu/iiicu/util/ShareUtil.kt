@@ -40,6 +40,9 @@ object ShareUtil {
         // 强制校验登录状态
         if (!checkLogin(context)) return false
 
+        // ★ 关键修复：分享前强制刷新QQ配置（确保自定义AppID生效）
+        QQUtil.refreshConfig(context)
+
         // 检查QQ SDK是否初始化成功
         val tencent = QQUtil.getTencent()
         if (tencent == null) {

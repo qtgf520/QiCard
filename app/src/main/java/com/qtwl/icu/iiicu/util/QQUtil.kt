@@ -29,6 +29,14 @@ object QQUtil {
     fun getTencent(): Tencent? = tencent
 
     /**
+     * 刷新QQ配置（重新读取QQConfigManager的最新配置）
+     * 每次分享前调用，确保自定义配置生效
+     */
+    fun refreshConfig(context: Context) {
+        init(context, QQConfigManager.getEffectiveAppId())
+    }
+
+    /**
      * 检查QQ是否已安装
      * 使用 PackageManager 手动检测 + SDK 检测双重保障
      */
